@@ -39,10 +39,16 @@ def main(election_folder):
     h_raw = settings['crypto']['h']
     g1_raw = settings['crypto']['g1']
     h1_raw = settings['crypto']['h1']
-    g_coord = [F(g_raw['coord'][0]), F(g_raw['coord'][1])]
-    h_coord = [F2(h_raw['coord'][0]), F2(h_raw['coord'][1])]
-    g1_coord = [F(g1_raw['coord'][0]), F(g1_raw['coord'][1])]
-    h1_coord = [F2(h1_raw['coord'][0]), F2(h1_raw['coord'][1])]
+
+    hx = [int(i) for i in h_raw['coord'][0]]
+    hy = [int(i) for i in h_raw['coord'][1]]
+    h1x = [int(i) for i in h1_raw['coord'][0]]
+    h1y = [int(i) for i in h1_raw['coord'][1]]
+
+    g_coord = [F(int(g_raw['coord'][0])), F(int(g_raw['coord'][1]))]
+    g1_coord = [F(int(g1_raw['coord'][0])), F(int(g1_raw['coord'][1]))]
+    h_coord = [F2(hx), F2(hy)]
+    h1_coord = [F2(h1x), F2(h1y)]
     g = C(g_coord, representation = g_raw['repr'])
     g1 = C(g1_coord, representation = g1_raw['repr'])
     h = C2(h_coord, representation = h_raw['repr'])
@@ -58,8 +64,7 @@ def main(election_folder):
 
     while (vote != 0) & (vote != 1) :
         try:
-            v = int(raw_input("Please pick a choice (0 or 1) \
-                               and press <ENTER>... "))
+            v = int(raw_input("Please pick a choice (0 or 1) and press <ENTER>... "))
         except(ValueError): # Catch inputs that are not integers
             continue
         vote = v

@@ -175,8 +175,9 @@ def __compute_cc_proof(m, r, s, c, g, h, g1, h1):
 
     d = ccs_enc(j, u, v, g, h, g1, h1)
 
-    ecc = b64encode(sha256(g1, h1, c, d).digest())
-    # TODO attention à la manière dont le hash est calculé, synchro avec le JS?
+    longstring = g1.__repr__() + h1.__repr__() + c.__repr__() + d.__repr__()
+    ecc = int((sha256(longstring).hexdigest()), 16)
+    # TODO faut il faire modulo n_u_ ?
 
     (zm, zr, zs) = (j + ecc * m, u + ecc * r, v + ecc * s)
 
@@ -186,26 +187,27 @@ def __compute_cc_proof(m, r, s, c, g, h, g1, h1):
 def __compute_or_proof(m, c2, s, h, g1, h1):
     assert m == 0 | m == 1
 
-    e0, e1, t0, t1, w0, w1 = None
+    e0, e1, t0, t1, w0, w1 = None, None, None, None, None, None
     b = randint(n_u_ - 1)
 
     if m == 0:
         e1 = randint(n_u_ - 1)
         t1 = randint(n_u_ - 1)
         w0 = h * b
-        w1 = h * t1 + (c2 + ~(h1 * 1)) * (-e1)
-        e0 = b64encode(sha256(g1, h1, c2, w0, w1).digest()) - e1
-        # TODO vérifier que le nombre renvoyé par b64encode a une forme acceptable
-        # ce dont je doute...
+        w1 = h * t1 + (c2 - (h1 * 1)) * (-e1)
+        longstring = g1.__repr__() + h1.__repr__() + c2.__repr__() + w0.__repr__() + w1.__repr__()
+        e0 = int((sha256(longstring).hexdigest()), 16) - e1
+        # TODO faut il faire modulo n_u_ ?
         t0 = b + e0 * s
 
     else:
         e0 = randint(n_u_ - 1)
         t0 = randint(n_u_ - 1)
         w1 = h * b
-        w0 = h * t0 + (c2 + ~(h1 * 0)) * (-e0)
-        e1 = b64encode(sha256(g1, h1, c2, w0, w1).digest()) - e0
-        # TODO vérifier que le nombre renvoyé par b64encode a une forme acceptable
+        w0 = h * t0 + (c2 - (h1 * 0)) * (-e0)
+        longstring = g1.__repr__() + h1.__repr__() + c2.__repr__() + w0.__repr__() + w1.__repr__()
+        e0 = int((sha256(longstring).hexdigest()), 16) - e0
+        # TODO faut il faire modulo n_u_ ?
         t1 = b + e1 * s
 
     return (e0, e1, t0, t1)
